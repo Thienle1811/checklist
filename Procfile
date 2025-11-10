@@ -1,2 +1,2 @@
-release: bash setup.sh
-web: gunicorn core.wsgi
+release: python reset_admin_pass.py
+web: gunicorn core.wsgi:application
