@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi --chdir /app --env DJANGO_SETTINGS_MODULE=core.settings --log-file -
+web: gunicorn core.wsgi
