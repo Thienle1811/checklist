@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard Công việc</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      .pagination {
+        margin-top: 20px;
+      }
+      .pagination a {
+        margin: 0 5px;
+        text-decoration: none;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      form {
+        margin: 0;
+      }
+      td small {
+        color: #555;
+        font-size: 0.9em;
+      }
+      td em {
+        color: #888;
+        font-style: italic;
+      }
+
+      /* Style cho các nút Sửa/Xóa */
+      .actions a {
+        text-decoration: none;
+        color: #007bff;
+        font-size: 0.9em;
+        margin-right: 5px;
+      }
+      .actions button {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        padding: 0;
+        font-family: sans-serif;
+        font-size: 0.9em;
+      }
+
+      /* === LOGIC MÀU CHECKBOX MỚI === */
+      /* Đặt màu cho checkbox "Đã nhận" */
+      .checkbox-received {
+        accent-color: #28a745; /* Xanh lá đậm */
+      }
+      /* Đặt màu cho checkbox "Hoàn thành" */
+      .checkbox-completed {
+        accent-color: #dc3545; /* Đỏ đậm */
+      }
+      /* ============================= */
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div>
+        <h2>Checklist Công việc</h2>
+        Xin chào, <strong>{{ request.user.username }}</strong>
+      </div>
+      <div>
+        {% if request.user.is_staff %}
+        <a href="{% url 'task-create' %}">[+ Tạo Task mới]</a>
+        <a href="{% url 'manage-users' %}">[Quản lý Users]</a>
+        <a href="/admin/">[Admin Panel]</a>
+        {% endif %}
+        <a href="{% url 'logout' %}">[Đăng xuất]</a>
+      </div>
+    </nav>
+
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên công việc</th>
+          <th>Đơn vị gửi</th>
+          <th>Người nhận</th>
+          <th>Thời gian trả</th>
+          <th>Đã nhận</th>
+          <th>Hoàn thành</th>
+          {% if request.user.is_staff %}
+          <th>Hành động</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in page_obj %}
+        <tr>
+          <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+          <td>{{ task.task_name }}</td>
+          <td>{{ task.sender_unit }}</td>
+
+          <td>
+            {% if task.assignee %}
+            <strong>{{ task.assignee.username }}</strong>
+            {% else %}
+            <em>(Chưa nhận)</em>
+            {% endif %}
+          </td>
+
+          <td>{{ task.due_date|date:"d/m/Y H:i" }}</td>
+
+          <td>
+            <form action="{% url 'task-receive' task.id %}" method="POST">
+              {% csrf_token %}
+              <input
+                type="checkbox"
+                class="{% if task.is_received %}checkbox-received{% endif %}"
+                {%
+                if
+                task.is_received
+                %}checked
+                disabled{%
+                endif
+                %}
+                {%
+                if
+                task.assignee
+                %}disabled{%
+                endif
+                %}
+                onclick="this.form.submit()"
+              />
+            </form>
+            {% if task.received_at %}
+            <small>({{ task.received_at|date:"d/m H:i" }})</small>
+            {% endif %}
+          </td>
+
+          <td>
+            <form action="{% url 'task-complete' task.id %}" method="POST">
+              {% csrf_token %}
+              <input
+                type="checkbox"
+                class="{% if task.is_completed %}checkbox-completed{% endif %}"
+                {%
+                if
+                task.is_completed
+                %}checked
+                disabled{%
+                endif
+                %}
+                {%
+                if
+                request.user
+                !="task.assignee"
+                %}disabled{%
+                endif
+                %}
+                onclick="this.form.submit()"
+              />
+            </form>
+            {% if task.completed_at %}
+            <small>({{ task.completed_at|date:"d/m H:i" }})</small>
+            {% endif %}
+          </td>
+
+          {% if request.user.is_staff %}
+          <td class="actions">
+            <a href="{% url 'task-edit' task.id %}">Sửa</a>
+            <form
+              action="{% url 'task-delete' task.id %}"
+              method="POST"
+              style="display: inline"
+              onsubmit="return confirm('Bạn có chắc muốn xóa task này?');"
+            >
+              {% csrf_token %}
+              <button type="submit">Xóa</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{% if request.user.is_staff %}8{% else %}7{% endif %}">
+            Chưa có công việc nào.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}">Trang trước</a>
+      {% endif %}
+      <span>
+        Trang {{ page_obj.number }} của {{ page_obj.paginator.num_pages }}.
+      </span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}">Trang tiếp</a>
+      {% endif %}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+# Python/Django
+__pycache__/
+*.pyc
+*.sqlite3
+
+# Môi trường ảo (Rất quan trọng)
+venv/
+
+# Khóa bí mật
+/core/settings.py
+/core/local_settings.py
+
+# Mặc định của Django
+db.sqlite3
+/static/
+/staticfiles/
+.env
+
+# Log files
+*.log

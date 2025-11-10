@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tạo công việc mới</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+      }
+      form {
+        max-width: 500px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      div {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      /* Căn chỉnh input/select cho đẹp */
+      input[type="text"],
+      select,
+      input[type="datetime-local"] {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box; /* Quan trọng để padding không làm vỡ layout */
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      a {
+        text-decoration: none;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="POST">
+      {% csrf_token %}
+      <h2>Tạo công việc mới</h2>
+
+      <div>
+        <label>{{ form.task_name.label }}:</label>
+        {{ form.task_name }}
+      </div>
+      <div>
+        <label>{{ form.sender_unit.label }}:</label>
+        {{ form.sender_unit }}
+      </div>
+
+      <div>
+        <label>{{ form.due_date.label }}:</label>
+        {{ form.due_date }}
+      </div>
+
+      <hr />
+      <button type="submit">Lưu công việc</button>
+      <a href="{% url 'dashboard' %}" style="margin-left: 10px">Hủy</a>
+    </form>
+  </body>
+</html>

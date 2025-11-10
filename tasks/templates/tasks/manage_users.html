@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quản lý User</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        max-width: 800px;
+        margin: 20px auto;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      .actions a {
+        margin-right: 10px;
+        text-decoration: none;
+      }
+      .actions a.edit {
+        color: #007bff;
+      }
+      .actions a.delete {
+        color: #dc3545;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .header a {
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>Quản lý User</h2>
+      <a href="/admin/auth/user/add/" target="_blank">+ Thêm User mới</a>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tên đăng nhập (Username)</th>
+          <th>Email (Nếu có)</th>
+          <th>Tên</th>
+          <th>Họ</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in user_list %}
+        <tr>
+          <td><strong>{{ u.username }}</strong></td>
+          <td>{{ u.email|default:"---" }}</td>
+          <td>{{ u.first_name|default:"---" }}</td>
+          <td>{{ u.last_name|default:"---" }}</td>
+
+          <td class="actions">
+            <a
+              href="/admin/auth/user/{{ u.id }}/change/"
+              target="_blank"
+              class="edit"
+              >Sửa</a
+            >
+            <a
+              href="/admin/auth/user/{{ u.id }}/delete/"
+              target="_blank"
+              class="delete"
+              >Xóa</a
+            >
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">Không có user nào.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="text-align: center; margin-top: 20px">
+      <a href="{% url 'dashboard' %}">Quay về Dashboard</a>
+    </div>
+  </body>
+</html>

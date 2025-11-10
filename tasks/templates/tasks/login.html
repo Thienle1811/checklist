@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Đăng nhập</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        display: grid;
+        place-items: center;
+        min-height: 90vh;
+      }
+      form {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      div {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input {
+        width: 300px;
+        padding: 8px;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="post">
+      {% csrf_token %}
+      <h2>Đăng nhập Checklist</h2>
+
+      {% if form.errors %}
+      <p style="color: red">Tên đăng nhập hoặc mật khẩu không đúng!</p>
+      {% endif %}
+
+      <div>
+        <label for="id_username">Tên đăng nhập:</label>
+        {{ form.username }}
+      </div>
+      <div>
+        <label for="id_password">Mật khẩu:</label>
+        {{ form.password }}
+      </div>
+      <button type="submit">Đăng nhập</button>
+    </form>
+  </body>
+</html>
