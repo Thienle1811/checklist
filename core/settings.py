@@ -146,3 +146,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+# THÊM CÁC CẤU HÌNH BẢO MẬT BẮT BUỘC CHO PRODUCTION/HTTPS (RAILWAY)
+
+# 1. Báo cho Django biết rằng nó đang chạy sau một HTTPS proxy (Railway)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# 2. Bắt buộc Django chỉ gửi cookie qua HTTPS (Bắt buộc cho CSRF/Session)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
