@@ -2,7 +2,7 @@
 
 # THIẾT LẬP MẬT KHẨU TẠI ĐÂY
 ADMIN_USERNAME="admin"
-ADMIN_PASSWORD="123456@" # <--- THAY ĐỔI MẬT KHẨU NÀY
+ADMIN_PASSWORD="MyNewSecurePass456!" # <--- THAY ĐỔI MẬT KHẨU NÀY
 ADMIN_EMAIL="admin@example.com"
 
 # 1. TẠO CƠ SỞ DỮ LIỆU
