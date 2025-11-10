@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi
+eb: gunicorn core.wsgi --chdir /app -b 0.0.0.0:8080 --env DJANGO_SETTINGS_MODULE=core.settings
