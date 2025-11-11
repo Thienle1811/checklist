@@ -5,7 +5,6 @@ Django settings for core project.
 from pathlib import Path
 import os
 import dj_database_url # Cần cài đặt cục bộ: pip install dj-database-url
-import sys # Cần thiết cho wsgi
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +32,6 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-    # CHÚ Ý: Mặc dù ta xóa đăng nhập, admin và auth vẫn cần cho Dashboard Admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,7 +47,8 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Giữ lại AuthenticationMiddleware cho Admin Panel hoạt động
+    'django.contrib.auth.middleware.AuthenticationMiddleware', 
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -116,12 +115,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# XÓA CÁC CẤU HÌNH ĐĂNG NHẬP
-# LOGIN_URL = 'login'
-# LOGIN_REDIRECT_URL = 'dashboard'
-# LOGOUT_REDIRECT_URL = 'login'
+# XÓA CÁC CẤU HÌNH CHUYỂN HƯỚNG ĐĂNG NHẬP
 
 # CẤU HÌNH BẢO MẬT BẮT BUỘC CHO PRODUCTION/HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+
+# =======================================================
+# !!! CẤU HÌNH TẠM THỜI ĐỂ ĐẶT MẬT KHẨU ADMIN (BẮT BUỘC)
+# !!! HÃY XÓA KHỐI NÀY SAU KHI ĐĂNG NHẬP ADMIN THÀNH CÔNG
+# =======================================================
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+]
