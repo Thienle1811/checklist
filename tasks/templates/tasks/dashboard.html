@@ -41,10 +41,7 @@
       td small {
         color: #555;
         font-size: 0.9em;
-      }
-      td em {
-        color: #888;
-        font-style: italic;
+        display: block;
       }
 
       /* Style cho các nút Sửa/Xóa */
@@ -64,31 +61,41 @@
         font-size: 0.9em;
       }
 
-      /* === LOGIC MÀU CHECKBOX MỚI === */
-      /* Đặt màu cho checkbox "Đã nhận" */
-      .checkbox-received {
-        accent-color: #28a745; /* Xanh lá đậm */
+      /* Style cho trạng thái */
+      .status-received {
+        color: #28a745;
+        font-weight: bold;
+      } /* Xanh lá cây */
+      .status-completed {
+        color: #dc3545;
+        font-weight: bold;
+      } /* Đỏ */
+
+      /* Style cho Form Nhận việc */
+      .receive-form input[type="text"] {
+        width: 120px;
+        border: 1px solid #ccc;
+        padding: 3px;
+        margin-right: 5px;
       }
-      /* Đặt màu cho checkbox "Hoàn thành" */
-      .checkbox-completed {
-        accent-color: #dc3545; /* Đỏ đậm */
+      .receive-form button {
+        font-size: 0.8em;
+        padding: 3px 6px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
       }
-      /* ============================= */
     </style>
   </head>
   <body>
     <nav>
       <div>
         <h2>Checklist Công việc</h2>
-        Xin chào, <strong>{{ request.user.username }}</strong>
       </div>
       <div>
-        {% if request.user.is_staff %}
         <a href="{% url 'task-create' %}">[+ Tạo Task mới]</a>
-        <a href="{% url 'manage-users' %}">[Quản lý Users]</a>
         <a href="/admin/">[Admin Panel]</a>
-        {% endif %}
-        <a href="{% url 'logout' %}">[Đăng xuất]</a>
       </div>
     </nav>
 
@@ -102,9 +109,7 @@
           <th>Thời gian trả</th>
           <th>Đã nhận</th>
           <th>Hoàn thành</th>
-          {% if request.user.is_staff %}
           <th>Hành động</th>
-          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -115,71 +120,67 @@
           <td>{{ task.sender_unit }}</td>
 
           <td>
-            {% if task.assignee %}
-            <strong>{{ task.assignee.username }}</strong>
+            {% if task.assigned_name %}
+            <strong>{{ task.assigned_name }}</strong>
             {% else %}
-            <em>(Chưa nhận)</em>
+            <form
+              action="{% url 'enter-name' task.id %}"
+              method="POST"
+              class="receive-form"
+              style="display: flex"
+            >
+              {% csrf_token %}
+              <input
+                type="text"
+                name="assignee_name"
+                placeholder="Nhập tên bạn..."
+                required
+                {%
+                if
+                assigned_name
+                %}
+                value="{{ assigned_name }}"
+                {%
+                endif
+                %}
+              />
+              <button type="submit">Nhận Việc</button>
+            </form>
             {% endif %}
           </td>
 
           <td>{{ task.due_date|date:"d/m/Y H:i" }}</td>
 
           <td>
-            <form action="{% url 'task-receive' task.id %}" method="POST">
-              {% csrf_token %}
-              <input
-                type="checkbox"
-                class="{% if task.is_received %}checkbox-received{% endif %}"
-                {%
-                if
-                task.is_received
-                %}checked
-                disabled{%
-                endif
-                %}
-                {%
-                if
-                task.assignee
-                %}disabled{%
-                endif
-                %}
-                onclick="this.form.submit()"
-              />
-            </form>
-            {% if task.received_at %}
+            {% if task.is_received %}
+            <span class="status-received">Đã nhận</span>
             <small>({{ task.received_at|date:"d/m H:i" }})</small>
-            {% endif %}
+            {% else %} --- {% endif %}
           </td>
 
           <td>
+            {% if task.is_completed %}
+            <span class="status-completed">Đã hoàn thành</span>
+            <small>({{ task.completed_at|date:"d/m H:i" }})</small>
+            {% else %}
             <form action="{% url 'task-complete' task.id %}" method="POST">
               {% csrf_token %}
               <input
                 type="checkbox"
-                class="{% if task.is_completed %}checkbox-completed{% endif %}"
+                class="checkbox-completed"
                 {%
                 if
-                task.is_completed
-                %}checked
-                disabled{%
-                endif
-                %}
-                {%
-                if
-                request.user
-                !="task.assignee"
+                not
+                task.assigned_name
                 %}disabled{%
                 endif
                 %}
                 onclick="this.form.submit()"
               />
             </form>
-            {% if task.completed_at %}
-            <small>({{ task.completed_at|date:"d/m H:i" }})</small>
             {% endif %}
           </td>
 
-          {% if request.user.is_staff %}
           <td class="actions">
             <a href="{% url 'task-edit' task.id %}">Sửa</a>
             <form
@@ -192,13 +193,10 @@
               <button type="submit">Xóa</button>
             </form>
           </td>
-          {% endif %}
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if request.user.is_staff %}8{% else %}7{% endif %}">
-            Chưa có công việc nào.
-          </td>
+          <td colspan="8">Chưa có công việc nào.</td>
         </tr>
         {% endfor %}
       </tbody>
