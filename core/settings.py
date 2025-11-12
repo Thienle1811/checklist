@@ -4,7 +4,7 @@ Django settings for core project.
 
 from pathlib import Path
 import os
-import dj_database_url # Cần cài đặt cục bộ: pip install dj-database-url
+import dj_database_url 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            
         },
     },
 ]
@@ -90,12 +91,12 @@ else:
     }
 
 # Password validation (Giữ lại cho Admin)
-#AUTH_PASSWORD_VALIDATORS = [
- #  {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-   # {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-   # {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-  #  {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-#]
+AUTH_PASSWORD_VALIDATORS = [
+   {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+   {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+   {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+   {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
 
 
 # Internationalization
@@ -115,18 +116,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# XÓA CÁC CẤU HÌNH CHUYỂN HƯỚNG ĐĂNG NHẬP
-
 # CẤU HÌNH BẢO MẬT BẮT BUỘC CHO PRODUCTION/HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 
-# =======================================================
-# !!! CẤU HÌNH TẠM THỜI ĐỂ ĐẶT MẬT KHẨU ADMIN (BẮT BUỘC)
-# !!! HÃY XÓA KHỐI NÀY SAU KHI ĐĂNG NHẬP ADMIN THÀNH CÔNG
-# =======================================================
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.MD5PasswordHasher',
-]
+# THÊM CẤU HÌNH CHO HỆ THỐNG ĐĂNG NHẬP
+LOGIN_REDIRECT_URL = '/'      # Chuyển hướng về trang chủ/dashboard sau khi đăng nhập thành công
+# ĐIỀU CHỈNH: Sau khi Đăng xuất, chuyển hướng về đường dẫn /login/
+LOGOUT_REDIRECT_URL = '/login/' 
+LOGIN_URL = 'login'           # Tên URL được sử dụng để chuyển hướng người dùng chưa đăng nhập
+
+
+# XÓA KHỐI PASSWORD_HASHERS TẠM THỜI
+# (Đã xóa để sử dụng lại hàm hash mạnh của Django)

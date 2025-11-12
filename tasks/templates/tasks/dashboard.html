@@ -72,31 +72,114 @@
       } /* Đỏ */
 
       /* Style cho Form Nhận việc */
-      .receive-form input[type="text"] {
-        width: 120px;
-        border: 1px solid #ccc;
-        padding: 3px;
-        margin-right: 5px;
-      }
       .receive-form button {
         font-size: 0.8em;
-        padding: 3px 6px;
+        padding: 5px 8px;
         background-color: #007bff;
         color: white;
         border: none;
         cursor: pointer;
+        border-radius: 4px;
+      }
+      
+      /* CSS MỚI: Định kiểu nút bấm */
+      .nav-container {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Khoảng cách giữa các nút */
+      }
+      .nav-button {
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        display: inline-block; 
+      }
+      .nav-button:hover {
+        background-color: #0056b3;
+      }
+      .user-link {
+          background-color: #6c757d; /* Màu xám cho Quản lý User */
+      }
+      .user-link:hover {
+          background-color: #5a6268;
+      }
+      .logout-link {
+          background-color: #dc3545; /* Màu đỏ cho Đăng xuất */
+          border: none;
+          cursor: pointer;
+          font-family: sans-serif;
+          font-size: 16px;
+          line-height: normal;
+      }
+      .logout-link:hover {
+          background-color: #c82333;
+      }
+      .user-info {
+          font-weight: bold;
+          white-space: nowrap;
+      }
+      .logout-form {
+          display: inline-block;
+          margin: 0;
+      }
+      /* Style cho thông báo */
+      .message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error, .warning {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
       }
     </style>
   </head>
   <body>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags == 'error' or message.tags == 'warning' %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <nav>
       <div>
         <h2>Checklist Công việc</h2>
       </div>
-      <div>
-        <a href="{% url 'task-create' %}">[+ Tạo Task mới]</a>
-        <a href="/admin/">[Admin Panel]</a>
+      
+      <div class="nav-container">
+        {% if user.is_authenticated %}
+            {% if request.user.is_staff %}
+                <a href="{% url 'task-create' %}" class="nav-button">+ Tạo Task mới</a>
+                <a href="{% url 'manage-users' %}" class="nav-button user-link">Quản lý User</a>
+            {% endif %}
+            
+            <form action="{% url 'logout' %}" method="POST" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="nav-button logout-link">Đăng xuất</button>
+            </form>
+            
+            <span class="user-info">Chào, {{ user.username }}!</span>
+            
+        {% else %}
+            <a href="{% url 'login' %}" class="nav-button">Đăng nhập</a>
+        {% endif %}
       </div>
+      
     </nav>
 
     <table>
@@ -121,31 +204,24 @@
 
           <td>
             {% if task.assigned_name %}
-            <strong>{{ task.assigned_name }}</strong>
-            {% else %}
-            <form
-              action="{% url 'enter-name' task.id %}"
-              method="POST"
-              class="receive-form"
-              style="display: flex"
-            >
-              {% csrf_token %}
-              <input
-                type="text"
-                name="assignee_name"
-                placeholder="Nhập tên bạn..."
-                required
-                {%
-                if
-                assigned_name
-                %}
-                value="{{ assigned_name }}"
-                {%
-                endif
-                %}
-              />
-              <button type="submit">Nhận Việc</button>
-            </form>
+                <strong>{{ task.assigned_name }}</strong>
+            {% elif request.user.is_authenticated %}
+                <form
+                  action="{% url 'enter-name' task.id %}"
+                  method="POST"
+                  class="receive-form"
+                  style="display: flex"
+                >
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="assignee_name"
+                    value="{{ request.user.username }}"
+                  />
+                  <button type="submit">Nhận Việc</button>
+                </form>
+            {% else %} 
+                ---
             {% endif %}
           </td>
 
@@ -163,35 +239,38 @@
             <span class="status-completed">Đã hoàn thành</span>
             <small>({{ task.completed_at|date:"d/m H:i" }})</small>
             {% else %}
-            <form action="{% url 'task-complete' task.id %}" method="POST">
-              {% csrf_token %}
-              <input
-                type="checkbox"
-                class="checkbox-completed"
-                {%
-                if
-                not
-                task.assigned_name
-                %}disabled{%
-                endif
-                %}
-                onclick="this.form.submit()"
-              />
-            </form>
+            
+                {% if request.user.is_staff or task.assigned_name == request.user.username %}
+                    <form action="{% url 'task-complete' task.id %}" method="POST">
+                      {% csrf_token %}
+                      <input
+                        type="checkbox"
+                        class="checkbox-completed"
+                        onclick="this.form.submit()"
+                      />
+                    </form>
+                {% else %}
+                    ---
+                {% endif %}
+
             {% endif %}
           </td>
 
           <td class="actions">
-            <a href="{% url 'task-edit' task.id %}">Sửa</a>
-            <form
-              action="{% url 'task-delete' task.id %}"
-              method="POST"
-              style="display: inline"
-              onsubmit="return confirm('Bạn có chắc muốn xóa task này?');"
-            >
-              {% csrf_token %}
-              <button type="submit">Xóa</button>
-            </form>
+            {% if request.user.is_staff %}
+                <a href="{% url 'task-edit' task.id %}">Sửa</a>
+                <form
+                  action="{% url 'task-delete' task.id %}"
+                  method="POST"
+                  style="display: inline"
+                  onsubmit="return confirm('Bạn có chắc muốn xóa task này?');"
+                >
+                  {% csrf_token %}
+                  <button type="submit">Xóa</button>
+                </form>
+            {% else %}
+                ---
+            {% endif %}
           </td>
         </tr>
         {% empty %}

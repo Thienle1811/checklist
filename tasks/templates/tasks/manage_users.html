@@ -2,7 +2,7 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Quản lý User</title>
+    <title>Quản lý Tài khoản</title>
     <style>
       body {
         font-family: sans-serif;
@@ -11,7 +11,7 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        max-width: 800px;
+        max-width: 900px;
         margin: 20px auto;
       }
       th,
@@ -23,81 +23,133 @@
       th {
         background-color: #f4f4f4;
       }
-      .actions a {
+      .actions a,
+      .actions form {
         margin-right: 10px;
         text-decoration: none;
+        display: inline-block;
       }
       .actions a.edit {
         color: #007bff;
       }
-      .actions a.delete {
+      .actions button.delete {
+        background: none;
+        border: none;
         color: #dc3545;
+        cursor: pointer;
+        padding: 0;
+        font-family: sans-serif;
+        font-size: 1em;
       }
       .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
       }
-      .header a {
+      .header a.nav-button {
         text-decoration: none;
-        background-color: #007bff;
+        background-color: #28a745;
         color: white;
         padding: 8px 12px;
         border-radius: 5px;
+        font-weight: bold;
+      }
+      .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #007bff;
+      }
+      .error-message {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+      }
+      .success-message {
+        color: green;
+        font-weight: bold;
+        text-align: center;
       }
     </style>
   </head>
   <body>
+    {% if messages %} {% for message in messages %}
+    <p
+      class="{% if message.tags == 'error' %}error-message{% elif message.tags == 'success' %}success-message{% endif %}"
+    >
+      {{ message }}
+    </p>
+    {% endfor %} {% endif %}
+
     <div class="header">
-      <h2>Quản lý User</h2>
-      <a href="/admin/auth/user/add/" target="_blank">+ Thêm User mới</a>
+      <h2>Quản lý Tài khoản (Users)</h2>
+      <a href="{% url 'user-create' %}" class="nav-button">+ Thêm User mới</a>
     </div>
 
     <table>
       <thead>
         <tr>
           <th>Tên đăng nhập (Username)</th>
-          <th>Email (Nếu có)</th>
+          <th>Email</th>
           <th>Tên</th>
           <th>Họ</th>
+          <th>Là Admin</th>
+          <th>Hoạt động</th>
           <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
+        <!-- Thêm dòng cho Admin hiện tại -->
+        <tr>
+          <td><strong>{{ request.user.username }}</strong></td>
+          <td>{{ request.user.email|default:"---" }}</td>
+          <td>{{ request.user.first_name|default:"---" }}</td>
+          <td>{{ request.user.last_name|default:"---" }}</td>
+          <td><strong style="color: blue">Siêu Admin</strong></td>
+          <td>Có</td>
+          <td class="actions">
+            <a href="{% url 'admin-password-change' %}" class="edit"
+              >Đổi Mật khẩu</a
+            >
+          </td>
+        </tr>
+
+        <!-- Danh sách các User khác -->
         {% for u in user_list %}
         <tr>
           <td><strong>{{ u.username }}</strong></td>
           <td>{{ u.email|default:"---" }}</td>
           <td>{{ u.first_name|default:"---" }}</td>
           <td>{{ u.last_name|default:"---" }}</td>
+          <td>{% if u.is_staff %}Có{% else %}Không{% endif %}</td>
+          <td>{% if u.is_active %}Có{% else %}Không{% endif %}</td>
 
           <td class="actions">
-            <a
-              href="/admin/auth/user/{{ u.id }}/change/"
-              target="_blank"
-              class="edit"
-              >Sửa</a
+            <a href="{% url 'user-edit' u.id %}" class="edit">Sửa</a>
+            <form
+              action="{% url 'user-delete' u.id %}"
+              method="POST"
+              style="display: inline-block"
+              onsubmit="return confirm('Bạn có chắc muốn xóa tài khoản {{ u.username }}?');"
             >
-            <a
-              href="/admin/auth/user/{{ u.id }}/delete/"
-              target="_blank"
-              class="delete"
-              >Xóa</a
-            >
+              {% csrf_token %}
+              <button type="submit" class="delete">Xóa</button>
+            </form>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5">Không có user nào.</td>
+          <td colspan="7">Không có user nào khác.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
     <div style="text-align: center; margin-top: 20px">
-      <a href="{% url 'dashboard' %}">Quay về Dashboard</a>
+      <a href="{% url 'dashboard' %}" class="back-link">Quay về Dashboard</a>
     </div>
   </body>
 </html>

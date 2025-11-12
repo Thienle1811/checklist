@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ action|default:"Tạo" }} Tài khoản</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+      }
+      form {
+        max-width: 500px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      div {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input:not([type="checkbox"]),
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      a {
+        text-decoration: none;
+        color: #007bff;
+        margin-left: 10px;
+      }
+      /* Style cho checkbox */
+      input[type="checkbox"] {
+        width: auto;
+      }
+      ul.errorlist {
+        list-style: none;
+        padding: 0;
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="POST">
+      {% csrf_token %}
+      <h2>{{ action|default:"Tạo" }} Tài khoản User</h2>
+
+      {% for field in form %}
+      <div>
+        <!-- Hiển thị lỗi trước -->
+        {{ field.errors }} {% if field.field.widget.input_type == 'checkbox' %}
+        <!-- Trường checkbox -->
+        <label> {{ field }} {{ field.label }} </label>
+        {% else %}
+        <!-- Các trường khác -->
+        <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+        {{ field }} {% endif %}
+      </div>
+      {% endfor %}
+
+      <hr />
+      <button type="submit">{{ action|default:"Lưu" }} Tài khoản</button>
+      <a href="{% url 'manage-users' %}">Hủy</a>
+    </form>
+  </body>
+</html>
