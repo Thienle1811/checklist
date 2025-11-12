@@ -4,7 +4,7 @@ Django settings for core project.
 
 from pathlib import Path
 import os
-import dj_database_url 
+import dj_database_url # Cần cài đặt cục bộ: pip install dj-database-url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,15 +19,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z!$690#^1234567890')
 DEBUG = os.environ.get('DEBUG') != 'False'
 
 
-# CẤU HÌNH ALLOWED_HOSTS
-if DEBUG:
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.railway.app']
-else:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-    if '.railway.app' not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append('.railway.app')
-    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
-
+# CẤU HÌNH ALLOWED_HOSTS (ĐÃ SỬA)
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'thanhthien1811.pythonanywhere.com']
 
 # Application definition
 
@@ -67,7 +60,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            
         },
     },
 ]
@@ -124,10 +116,5 @@ SESSION_COOKIE_SECURE = True
 
 # THÊM CẤU HÌNH CHO HỆ THỐNG ĐĂNG NHẬP
 LOGIN_REDIRECT_URL = '/'      # Chuyển hướng về trang chủ/dashboard sau khi đăng nhập thành công
-# ĐIỀU CHỈNH: Sau khi Đăng xuất, chuyển hướng về đường dẫn /login/
 LOGOUT_REDIRECT_URL = '/login/' 
 LOGIN_URL = 'login'           # Tên URL được sử dụng để chuyển hướng người dùng chưa đăng nhập
-
-
-# XÓA KHỐI PASSWORD_HASHERS TẠM THỜI
-# (Đã xóa để sử dụng lại hàm hash mạnh của Django)
